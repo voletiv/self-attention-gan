@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import datetime
 import os
 
 from absl import flags
@@ -25,8 +26,6 @@ import tensorflow as tf
 
 import utils_ori as utils
 import model
-
-
 
 tfgan = tf.contrib.gan
 gfile = tf.gfile
@@ -65,7 +64,6 @@ flags.DEFINE_integer('g_step', 1, 'The number of G_step')
 FLAGS = flags.FLAGS
 
 
-
 def main(_, is_test=False):
   print('d_learning_rate', FLAGS.discriminator_learning_rate)
   print('g_learning_rate', FLAGS.generator_learning_rate)
@@ -75,7 +73,7 @@ def main(_, is_test=False):
   print('Starting the program..')
   gfile.MakeDirs(FLAGS.checkpoint_dir)
 
-  model_dir = '%s_%s' % ('imagenet', FLAGS.batch_size)
+  model_dir = '{0:%Y%m%d_%H%M%S}_{1}_{2}' % (datetime.datetime.now(), 'CLEVR', FLAGS.batch_size)
   logdir = os.path.join(FLAGS.checkpoint_dir, model_dir)
   gfile.MakeDirs(logdir)
 
