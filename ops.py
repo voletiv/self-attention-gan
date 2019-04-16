@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.ops import math_ops
 from contextlib import contextmanager
 
 
@@ -358,6 +359,51 @@ class ConditionalBatchNorm(object):
               inputs, self.moving_mean, self.moving_var, beta, gamma, variance_epsilon)
       outputs.set_shape(inputs_shape)
       return outputs
+
+class ConditionalGroupNorm(object):
+  """Conditional BatchNorm.
+
+  For each  class, it has a specific gamma and beta as normalization variable.
+  """
+
+  def __init__(self, num_categories, num_groups, name='conditional_group_norm',
+               center=True, scale=True):
+    with tf.variable_scope(name):
+      self.name = name
+      self.num_categories = num_categories
+      self.num_groups = num_groups
+      self.center = center
+      self.scale = scale
+      self.decay_rate = decay_rate
+
+  def __call__(self, inputs, labels, is_training=True):
+    inputs = tf.convert_to_tensor(inputs)
+    inputs_shape = inputs.get_shape()
+    params_shape = inputs_shape[-1:]
+    axis = [0, 1, 2]
+    shape = tf.TensorShape([self.num_categories]).concatenate(params_shape)
+
+    with tf.variable_scope(self.name):
+      self.gamma = tf.get_variable(
+          'gamma', shape,
+          initializer=tf.ones_initializer())
+      self.beta = tf.get_variable(
+          'beta', shape,
+          initializer=tf.zeros_initializer())
+
+      beta = tf.gather(self.beta, labels)
+      beta = tf.expand_dims(tf.expand_dims(beta, 1), 1)
+      gamma = tf.gather(self.gamma, labels)
+      gamma = tf.expand_dims(tf.expand_dims(gamma, 1), 1)
+
+      epsilon = 1E-5
+      gn_out = tf.contrib.layers.group_norm(inputs, self.num_groups, center=False, scale=False, epsilon=epsilon)
+
+      outputs = gn_out * math_ops(gamma, inputs.dtype) + math_ops(beta, inputs.dtype)
+      outputs.set_shape(inputs_shape)
+
+      return outputs
+
 
 class batch_norm(object):
   def __init__(self, epsilon=1e-5, momentum = 0.9999, name="batch_norm"):
