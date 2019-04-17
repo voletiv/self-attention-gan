@@ -23,6 +23,7 @@ import tensorflow as tf
 
 import discriminator as disc
 import generator as generator_module
+# import generator_CGN as generator_module
 
 import ops
 import utils_ori as utils
