@@ -57,7 +57,6 @@ flags.DEFINE_string('generator_type', 'test', 'test or baseline')
 flags.DEFINE_string('discriminator_type', 'test', 'test or baseline')
 
 
-
 FLAGS = flags.FLAGS
 
 
@@ -108,6 +107,8 @@ class SNGAN(object):
     self.gf_dim = FLAGS.gf_dim
     self.df_dim = FLAGS.df_dim
     self.num_classes = FLAGS.number_classes
+    self.CGN = FLAGS.CGN
+    self.CGN_groups = FLAGS.CGN_groups
 
     self.data_parallelism = FLAGS.data_parallelism
     self.zs = zs
@@ -239,7 +240,9 @@ class SNGAN(object):
         self.zs[gpu_idx],
         gen_sparse_class,
         self.gf_dim,
-        self.num_classes
+        self.num_classes,
+        self.CGN,
+        self.CGN_groups
         )
 
 

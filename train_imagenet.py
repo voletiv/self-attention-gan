@@ -58,6 +58,10 @@ flags.DEFINE_boolean('sync_replicas', True, 'Whether to sync replicas. [True]')
 flags.DEFINE_integer('num_towers', 1, 'The number of GPUs to use per task. [1]')
 flags.DEFINE_integer('d_step', 1, 'The number of D_step')
 flags.DEFINE_integer('g_step', 1, 'The number of G_step')
+
+flags.DEFINE_boolean('CGN', False, 'True: CGN, False: CBN [False]')
+flags.DEFINE_integer('CGN_groups', 4, 'Number of groups for GroupNorm [4]')
+
 flags.DEFINE_string('name', 'tfSAGAN',
                     'name of experiment. [tfSAGAN]')
 
@@ -74,6 +78,7 @@ def main(_, is_test=False):
   print('name', FLAGS.name)
   print(FLAGS.loss_type, FLAGS.batch_size, FLAGS.beta1)
   print('gf_df_dim', FLAGS.gf_dim, FLAGS.df_dim)
+  print("CGN:", FLAGS.CGN, FLAGS.CGN_groups)
   print('Starting the program..')
   gfile.MakeDirs(FLAGS.checkpoint_dir)
 

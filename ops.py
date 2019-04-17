@@ -360,7 +360,7 @@ class ConditionalBatchNorm(object):
       return outputs
 
 class ConditionalGroupNorm(object):
-  """Conditional BatchNorm.
+  """Conditional GroupNorm.
 
   For each  class, it has a specific gamma and beta as normalization variable.
   """
@@ -373,7 +373,6 @@ class ConditionalGroupNorm(object):
       self.num_groups = num_groups
       self.center = center
       self.scale = scale
-      self.decay_rate = decay_rate
 
   def __call__(self, inputs, labels, is_training=True):
     inputs = tf.convert_to_tensor(inputs)

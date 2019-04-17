@@ -75,15 +75,20 @@ def block_no_sn(x, labels, out_channels, num_classes, is_training, name):
 
     return x_0 + x
 
-def block(x, labels, out_channels, num_classes, is_training, name):
+def block(x, labels, out_channels, num_classes, is_training, CGN, CGN_groups, name):
   with tf.variable_scope(name):
-    bn0 = ops.ConditionalBatchNorm(num_classes, name='cbn_0')
-    bn1 = ops.ConditionalBatchNorm(num_classes, name='cbn_1')
+    if CGN:
+      norm0 = ops.ConditionalGroupNorm(num_classes, CGN_groups, name='cgn_0')
+      norm1 = ops.ConditionalGroupNorm(num_classes, CGN_groups, name='cgn_1')
+    else:
+      norm0 = ops.ConditionalBatchNorm(num_classes, name='cbn_0')
+      norm1 = ops.ConditionalBatchNorm(num_classes, name='cbn_1')
+
     x_0 = x
-    x = tf.nn.relu(bn0(x, labels, is_training))
+    x = tf.nn.relu(norm0(x, labels, is_training))
     x = usample(x)
     x = ops.snconv2d(x, out_channels, 3, 3, 1, 1, name='snconv1')
-    x = tf.nn.relu(bn1(x, labels, is_training))
+    x = tf.nn.relu(norm1(x, labels, is_training))
     x = ops.snconv2d(x, out_channels, 3, 3, 1, 1, name='snconv2')
 
     x_0 = usample(x_0)
@@ -96,6 +101,8 @@ def generator_old(zs,
               target_class,
               gf_dim,
               num_classes,
+              CGN=False,
+              CGN_groups=4,
               is_training=True,
               scope='Generator'):
   """Builds the generator graph propagating from z to x.
@@ -138,6 +145,8 @@ def generator(zs,
                target_class,
                gf_dim,
                num_classes,
+               CGN=False,
+               CGN_groups=4,
                is_training=True):
   """Builds the generator graph propagating from z to x.
 
@@ -158,15 +167,15 @@ def generator(zs,
     act0 = tf.reshape(act0, [-1, 4, 4, gf_dim * 16])
 
     act1 = block(act0, target_class, gf_dim * 16,
-                 num_classes, is_training, 'g_block1')  # 8 * 8
+                 num_classes, is_training, CGN, CGN_groups, 'g_block1')  # 8 * 8
     act2 = block(act1, target_class, gf_dim * 8,
-                 num_classes, is_training, 'g_block2')  # 16 * 16
+                 num_classes, is_training, CGN, CGN_groups, 'g_block2')  # 16 * 16
     act3 = block(act2, target_class, gf_dim * 4,
-                 num_classes, is_training, 'g_block3')  # 32 * 32
+                 num_classes, is_training, CGN, CGN_groups, 'g_block3')  # 32 * 32
     act4 = block(act3, target_class, gf_dim * 2,
-                 num_classes, is_training, 'g_block4')  # 64 * 64
+                 num_classes, is_training, CGN, CGN_groups, 'g_block4')  # 64 * 64
     act5 = block(act4, target_class, gf_dim,
-                 num_classes, is_training, 'g_block5')  # 128 * 128
+                 num_classes, is_training, CGN, CGN_groups, 'g_block5')  # 128 * 128
     bn = ops.batch_norm(name='g_bn')
 
     act5 = tf.nn.relu(bn(act5, is_training))
@@ -180,6 +189,8 @@ def generator_test(zs,
                    target_class,
                    gf_dim,
                    num_classes,
+                   CGN=False,
+                   CGN_groups=4,
                    is_training=True):
   """Builds the generator graph propagating from z to x.
 
@@ -200,16 +211,16 @@ def generator_test(zs,
     act0 = tf.reshape(act0, [-1, 4, 4, gf_dim * 16])
 
     act1 = block(act0, target_class, gf_dim * 16,
-                 num_classes, is_training, 'g_block1')  # 8 * 8
+                 num_classes, is_training, CGN, CGN_groups, 'g_block1')  # 8 * 8
     act2 = block(act1, target_class, gf_dim * 8,
-                 num_classes, is_training, 'g_block2')  # 16 * 16
+                 num_classes, is_training, CGN, CGN_groups, 'g_block2')  # 16 * 16
     act3 = block(act2, target_class, gf_dim * 4,
-                 num_classes, is_training, 'g_block3')  # 32 * 32
+                 num_classes, is_training, CGN, CGN_groups, 'g_block3')  # 32 * 32
     act3 = non_local.sn_non_local_block_sim(act3, None, name='g_non_local')
     act4 = block(act3, target_class, gf_dim * 2,
-                 num_classes, is_training, 'g_block4')  # 64 * 64
+                 num_classes, is_training, CGN, CGN_groups, 'g_block4')  # 64 * 64
     act5 = block(act4, target_class, gf_dim,
-                 num_classes, is_training, 'g_block5')  # 128 * 128
+                 num_classes, is_training, CGN, CGN_groups, 'g_block5')  # 128 * 128
     bn = ops.batch_norm(name='g_bn')
 
     act5 = tf.nn.relu(bn(act5, is_training))
@@ -222,6 +233,8 @@ def generator_test_64(zs,
                    target_class,
                    gf_dim,
                    num_classes,
+                   CGN=False,
+                   CGN_groups=4,
                    is_training=True):
   """Builds the generator graph propagating from z to x.
 
@@ -242,17 +255,17 @@ def generator_test_64(zs,
     act0 = tf.reshape(act0, [-1, 4, 4, gf_dim * 16])
 
     act1 = block(act0, target_class, gf_dim * 16,
-                 num_classes, is_training, 'g_block1')  # 8 * 8
+                 num_classes, is_training, CGN, CGN_groups, 'g_block1')  # 8 * 8
     act2 = block(act1, target_class, gf_dim * 8,
-                 num_classes, is_training, 'g_block2')  # 16 * 16
+                 num_classes, is_training, CGN, CGN_groups, 'g_block2')  # 16 * 16
     act3 = block(act2, target_class, gf_dim * 4,
-                 num_classes, is_training, 'g_block3')  # 32 * 32
+                 num_classes, is_training, CGN, CGN_groups, 'g_block3')  # 32 * 32
 
     act4 = block(act3, target_class, gf_dim * 2,
-                 num_classes, is_training, 'g_block4')  # 64 * 64
+                 num_classes, is_training, CGN, CGN_groups, 'g_block4')  # 64 * 64
     act4 = non_local.sn_non_local_block_sim(act4, None, name='g_non_local')
     act5 = block(act4, target_class, gf_dim,
-                 num_classes, is_training, 'g_block5')  # 128 * 128
+                 num_classes, is_training, CGN, CGN_groups, 'g_block5')  # 128 * 128
     bn = ops.batch_norm(name='g_bn')
 
     act5 = tf.nn.relu(bn(act5, is_training))
