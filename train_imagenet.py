@@ -77,7 +77,7 @@ def main(_, is_test=False):
   print('Starting the program..')
   gfile.MakeDirs(FLAGS.checkpoint_dir)
 
-  model_dir = '{0:%Y%m%d_%H%M%S}_{1}_bs{2}' % (datetime.datetime.now(), FLAGS.name, FLAGS.batch_size)
+  model_dir = '{0:%Y%m%d_%H%M%S}_{1}_bs{2}'.format(datetime.datetime.now(), FLAGS.name, FLAGS.batch_size)
   logdir = os.path.join(FLAGS.checkpoint_dir, model_dir)
   gfile.MakeDirs(logdir)
 

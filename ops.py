@@ -20,7 +20,6 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.ops import math_ops
 from contextlib import contextmanager
 
 
@@ -399,7 +398,7 @@ class ConditionalGroupNorm(object):
       epsilon = 1E-5
       gn_out = tf.contrib.layers.group_norm(inputs, self.num_groups, center=False, scale=False, epsilon=epsilon)
 
-      outputs = gn_out * math_ops(gamma, inputs.dtype) + math_ops(beta, inputs.dtype)
+      outputs = gn_out * tf.cast(gamma, inputs.dtype) + tf.cast(beta, inputs.dtype)
       outputs.set_shape(inputs_shape)
 
       return outputs
