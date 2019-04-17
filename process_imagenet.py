@@ -9,8 +9,6 @@ from tqdm import tqdm
 import tensorflow as tf
 from glob import glob
 
-from utils import get_image, colorize
-
 # this is based on tensorflow tutorial code
 # https://github.com/tensorflow/tensorflow/blob/r0.8/tensorflow/examples/how_tos/reading_data/convert_to_records.py
 # TODO: it is probably very wasteful to store these images as raw numpy
@@ -56,7 +54,7 @@ def main(argv):
     outfile = 'TinyImageNet_' + str(IMSIZE) + '.tfrecords'
     writer = tf.python_io.TFRecordWriter(outfile)
 
-    for i, f in tqdm(enumerate(files)):
+    for i, f in tqdm(enumerate(files), total=len(files)):
         # image = get_image(f, IMSIZE, is_crop=True, resize_w=IMSIZE)
         # image = colorize(image)
         im = imread(f)

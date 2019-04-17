@@ -39,9 +39,9 @@ flags.DEFINE_string('master', 'local',
 flags.DEFINE_string('checkpoint_dir', 'checkpoint',
                     'Directory name to save the checkpoints. [checkpoint]')
 flags.DEFINE_integer('batch_size', 64, 'Number of images in input batch. [64]') # ori 16
-flags.DEFINE_integer('shuffle_buffer_size', 100000, 'Number of records to load '
+flags.DEFINE_integer('shuffle_buffer_size', 6400, 'Number of records to load '
                      'before shuffling and yielding for consumption. [100000]')
-flags.DEFINE_integer('save_summaries_steps', 200, 'Number of seconds between '
+flags.DEFINE_integer('save_summaries_steps', 100, 'Number of seconds between '
                      'saving summary statistics. [1]')  # default 300
 flags.DEFINE_integer('save_checkpoint_secs', 1200, 'Number of seconds between '
                      'saving checkpoints of model. [1200]')
@@ -55,9 +55,11 @@ flags.DEFINE_integer('num_workers', 1, 'The number of worker tasks. [1]')
 flags.DEFINE_integer('replicas_to_aggregate', 1, 'The number of replicas '
                      'to aggregate for synchronous optimization [1]')
 flags.DEFINE_boolean('sync_replicas', True, 'Whether to sync replicas. [True]')
-flags.DEFINE_integer('num_towers', 4, 'The number of GPUs to use per task. [1]')
+flags.DEFINE_integer('num_towers', 1, 'The number of GPUs to use per task. [1]')
 flags.DEFINE_integer('d_step', 1, 'The number of D_step')
 flags.DEFINE_integer('g_step', 1, 'The number of G_step')
+flags.DEFINE_string('name', 'tfSAGAN',
+                    'name of experiment. [tfSAGAN]')
 
 # flags.DEFINE_integer('z_dim', 128, 'The dimension of z')
 
@@ -68,12 +70,14 @@ def main(_, is_test=False):
   print('d_learning_rate', FLAGS.discriminator_learning_rate)
   print('g_learning_rate', FLAGS.generator_learning_rate)
   print('data_dir', FLAGS.data_dir)
+  print('num_classes', FLAGS.number_classes)
+  print('name', FLAGS.name)
   print(FLAGS.loss_type, FLAGS.batch_size, FLAGS.beta1)
   print('gf_df_dim', FLAGS.gf_dim, FLAGS.df_dim)
   print('Starting the program..')
   gfile.MakeDirs(FLAGS.checkpoint_dir)
 
-  model_dir = '{0:%Y%m%d_%H%M%S}_{1}_{2}' % (datetime.datetime.now(), FLAGS.batch_size)
+  model_dir = '{0:%Y%m%d_%H%M%S}_{1}_bs{2}' % (datetime.datetime.now(), FLAGS.name, FLAGS.batch_size)
   logdir = os.path.join(FLAGS.checkpoint_dir, model_dir)
   gfile.MakeDirs(logdir)
 
